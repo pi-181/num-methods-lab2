@@ -142,6 +142,18 @@ public class MatrixTable {
                 fields[y][x].setText(String.valueOf(matrix[y][x]));
     }
 
+    public double[][] getDoubleMatrix() {
+        double[][] matrix = new double[height][width];
+
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+                String text = fields[y][x].getText();
+                matrix[y][x] = text.isBlank() ? 0 : Double.parseDouble(text);
+            }
+
+        return matrix;
+    }
+
     public void setMatrix(Object[][] matrix) {
         if (matrix.length == 0) {
             init(0, 0);

@@ -2,6 +2,10 @@ package com.demkom58.nmlab2;
 
 import com.demkom58.divine.gui.GuiController;
 import com.demkom58.divine.util.AlertUtil;
+import com.demkom58.nmlab2.calculations.Answer;
+import com.demkom58.nmlab2.calculations.EquationSystemSolver;
+import com.demkom58.nmlab2.calculations.GaussSeidel;
+import com.demkom58.nmlab2.calculations.Jacobi;
 import com.demkom58.nmlab2.util.MatrixTable;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -9,15 +13,22 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.util.converter.NumberStringConverter;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class MainController extends GuiController {
 
-    @FXML private GridPane matrixRoot;
+    @FXML
+    private GridPane matrixRoot;
 
-    @FXML private TextField accuracyInput;
-    @FXML private TextField iterationLimitInput;
+    @FXML
+    private TextField accuracyInput;
+    @FXML
+    private TextField iterationLimitInput;
 
-    @FXML private TextField systemSizeInput;
+    @FXML
+    private TextField systemSizeInput;
 
     private MatrixTable matrixTable;
 
@@ -25,7 +36,6 @@ public class MainController extends GuiController {
     public void init() {
         super.init();
 
-        accuracyInput.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
         iterationLimitInput.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
         systemSizeInput.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
 
@@ -39,6 +49,8 @@ public class MainController extends GuiController {
             return;
         }
 
+        var seidel = new Jacobi(getMatrix(), getIterationLimit(), getAccuracy());
+        calculate(seidel);
     }
 
     @FXML
@@ -48,6 +60,22 @@ public class MainController extends GuiController {
             return;
         }
 
+        var seidel = new GaussSeidel(getMatrix(), getIterationLimit(), getAccuracy());
+        calculate(seidel);
+    }
+
+    private void calculate(@NotNull final EquationSystemSolver solver) {
+        boolean diagonalDominant = solver.makeDominant();
+        if (!diagonalDominant)
+            AlertUtil.showErrorMessage("Система не є діагонально домінуючою: метод не може гарантувати конвергенцію.");
+
+        matrixTable.setMatrix(solver.getMatrix());
+        var solve = solver.solve();
+
+        var addition = solve.isStoppedByLimit() ? "Зупинено оскільки досягло ліміту ітерацій.\n" : "";
+        var beautified = String.join("\n", solve.getAnswer().split(" "));
+
+        AlertUtil.showInfoMessage(solver.getName() + ": Вирішено!", addition + beautified);
     }
 
     @FXML
@@ -59,6 +87,13 @@ public class MainController extends GuiController {
         }
 
         matrixTable.setMatrix(new int[size][size + 1]);
+    }
+
+    public double[][] getMatrix() {
+        if (matrixTable.isEmpty())
+            return new double[0][0];
+
+        return matrixTable.getDoubleMatrix();
     }
 
     public float getAccuracy() {
