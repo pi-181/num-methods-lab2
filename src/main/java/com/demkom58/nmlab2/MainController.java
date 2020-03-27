@@ -71,11 +71,16 @@ public class MainController extends GuiController {
 
         matrixTable.setMatrix(solver.getMatrix());
         var solve = solver.solve();
-
         var addition = solve.isStoppedByLimit() ? "Зупинено оскільки досягло ліміту ітерацій.\n" : "";
-        var beautified = String.join("\n", solve.getAnswer().split(" "));
 
-        AlertUtil.showInfoMessage(solver.getName() + ": Вирішено!", addition + beautified);
+        Answer.Iteration answer = solve.getAnswer();
+        double[] values = answer.getValues();
+
+        var builder = new StringBuilder("Ітерація " + answer.getNumber() + "\n");
+        for (int i = 0; i < values.length; i++)
+            builder.append("X").append((i + 1)).append(" = ").append(values[i]).append("\n");
+
+        AlertUtil.showInfoMessage(solver.getName() + ": Вирішено!", addition + builder.toString());
     }
 
     @FXML

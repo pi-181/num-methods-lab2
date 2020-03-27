@@ -83,7 +83,7 @@ public class Jacobi implements EquationSystemSolver
         Arrays.fill(P, 0);
 
         final Answer answer;
-        final List<String> iterationNodes = new ArrayList<>();
+        final List<Answer.Iteration> iterationNodes = new ArrayList<>();
 
         while (true) {
             for (int i = 0; i < n; i++) {
@@ -96,10 +96,9 @@ public class Jacobi implements EquationSystemSolver
                 X[i] = 1 / matrix[i][i] * sum;
             }
 
-            final StringBuilder builder = new StringBuilder("Ітерація " + iterations + ": ");
-            for (int i = 0; i < n; i++)
-                builder.append(X[i]).append("; ");
-            iterationNodes.add(builder.toString());
+            var iterationValues = new double[n];
+            System.arraycopy(X, 0, iterationValues, 0, n);
+            iterationNodes.add(new Answer.Iteration(iterations, iterationValues));
 
             iterations++;
             if (iterations == 1)
