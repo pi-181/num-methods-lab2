@@ -12,6 +12,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,10 +38,10 @@ public class MainController extends GuiController {
     public void init() {
         super.init();
 
-        iterationLimitInput.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
-        systemSizeInput.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
+        iterationLimitInput.setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
+        systemSizeInput.setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
 
-        matrixTable = new MatrixTable(matrixRoot, "0", true);
+        matrixTable = new MatrixTable(matrixRoot, 60, "0", () -> new TextFormatter<>(new DoubleStringConverter()));
     }
 
     @FXML
@@ -102,7 +104,7 @@ public class MainController extends GuiController {
     }
 
     public float getAccuracy() {
-        final String text = accuracyInput.getText();
+        final String text = accuracyInput.getText().replaceAll(" ", "");
         if (text.isEmpty())
             return Float.parseFloat(accuracyInput.getPromptText());
 
@@ -118,7 +120,7 @@ public class MainController extends GuiController {
     }
 
     public int getSystemSize() {
-        final String text = systemSizeInput.getText();
+        final String text = systemSizeInput.getText().replaceAll(" ", "");
         if (text.isEmpty())
             return Integer.parseInt(systemSizeInput.getPromptText());
 

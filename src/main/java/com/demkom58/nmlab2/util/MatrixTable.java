@@ -4,9 +4,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
-import javafx.util.converter.NumberStringConverter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 public class MatrixTable {
     private final CellUpdateCallback updateCallback;
@@ -21,18 +22,27 @@ public class MatrixTable {
     private int width;
     private int height;
 
-    private final boolean numbersOnly;
+    private final Supplier<TextFormatter<?>> formatterSupplier;
 
-    public MatrixTable(@NotNull final GridPane root, String defaultValue, boolean numbersOnly) {
-        this(null, root, 30, true, defaultValue, numbersOnly);
+    public MatrixTable(@NotNull final GridPane root,
+                       @NotNull String defaultValue,
+                       @Nullable Supplier<TextFormatter<?>> formatterSupplier) {
+        this(root, 30, defaultValue, formatterSupplier);
+    }
+
+    public MatrixTable(@NotNull final GridPane root,
+                       int cellSize,
+                       @NotNull String defaultValue,
+                       @Nullable Supplier<TextFormatter<?>> formatterSupplier) {
+        this(null, root, cellSize, true, defaultValue, formatterSupplier);
     }
 
     public MatrixTable(@Nullable final CellUpdateCallback updateCallback,
                        @NotNull final GridPane root,
                        int cellSize,
                        boolean editable,
-                       String defaultValue,
-                       boolean numbersOnly) {
+                       @NotNull String defaultValue,
+                       @Nullable Supplier<TextFormatter<?>> formatterSupplier) {
         this.updateCallback = updateCallback;
         this.root = root;
         this.cellSize = cellSize;
@@ -43,7 +53,7 @@ public class MatrixTable {
         this.width = 0;
         this.height = 0;
 
-        this.numbersOnly = numbersOnly;
+        this.formatterSupplier = formatterSupplier;
     }
 
     public void setMatrix(byte[][] matrix) {
@@ -201,8 +211,8 @@ public class MatrixTable {
         if (updateCallback != null)
             cell.setOnKeyTyped(action -> this.updateCallback.onCellUpdate(action, x, y));
 
-        if (numbersOnly)
-            cell.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
+        if (formatterSupplier != null)
+            cell.setTextFormatter(formatterSupplier.get());
 
         cell.setPrefSize(cellSize, cellSize);
         cell.setAlignment(Pos.CENTER);
